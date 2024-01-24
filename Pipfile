@@ -6,10 +6,11 @@ name = "pypi"
 [packages]
 flask = "*"
 gunicorn = "*"
+python3-saml = "*"
+lxml = "==4.9.4"
 
 [dev-packages]
 black = "*"
-mypy = "*"
 ruff = "*"
 safety = "*"
 pytest = "*"

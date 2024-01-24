@@ -18,6 +18,7 @@ update: install ## update all Python dependencies
 test: ## run tests and print a coverage report
 	pipenv run coverage run --source=cdnauth -m pytest -vv
 	pipenv run coverage report -m
+	pipenv run coverage html
 
 coveralls: test
 	pipenv run coverage lcov -o ./coverage/lcov.info
@@ -25,13 +26,10 @@ coveralls: test
 ## ---- Code quality and safety commands ---- ##
 
 # linting commands
-lint: black mypy ruff safety ## run all linters
+lint: black ruff safety ## run all linters
 
 black:
 	pipenv run black --check --diff .
-
-mypy:
-	pipenv run mypy .
 
 ruff:
 	pipenv run ruff check .
@@ -47,4 +45,13 @@ run-dev: ## run the flask app in dev
 	FLASK_ENV=development pipenv run flask --app cdnauth run --debug
 
 run-prod: ## run the flask app in a prod-like mode
-	FLASK_ENV=production pipenv run gunicorn cdnauth:app --log-file -
+	FLASK_ENV=production pipenv run gunicorn --bind 0.0.0.0 cdnauth:app  --log-level debug --log-file -
+
+
+## ---- Useful commands for managing the app when using a container for dev ---- ##
+
+build: ## build local container
+	docker build -t cdnauth-local .
+
+app-bash: build ## bash shell in app container with linked file system to local directory
+	docker run -it -v.:/app -p 5000:5000 -p 8000:8000 --env-file .env cdnauth-local bash

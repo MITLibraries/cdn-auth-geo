@@ -40,17 +40,50 @@ Not all links are publicly accessible.
 
 ## How to run this app locally
 
-- Pre-requisite: python 3.12 (if you use `asdf`, `asdf install python 3.12.1`)
-- switch to python 3.12 (`asdf shell python 3.12.1` or equivalent)
-- confirm you are using python 3.12 (`python --version`)
-- pipenv in your python 3.12 install: `pip install pipenv`
-  - note: failing to do this may not result in a noticeable problem, but this is still good practice as it will ensure you are using a `pipenv` within the correct version of python instead of one from your default version. Do this every time you install a new python version.
-- note: a python virtual environment will be created via `pipenv` when following the next steps if one does not yet exist. If you run into issues at any point, you can remove that virtualenv with `pipenv --rm` from the project root and start over.
+This application expects to be developed in docker. [There are dependency issues with libxmlxec1 on macos](https://github.com/SAML-Toolkits/python3-saml/issues/356) at this time and rather than each of us fighting with that, we will develop inside the docker container so it can be solved programatically and repeatably.
+
+Additionally, `lxml` versions newer than 4.9.4 [crash python3-saml](https://github.com/SAML-Toolkits/python3-saml/issues/389)
+
+### General development workflow
+
+- Pre-requisite: docker
+
+- `make app-bash` will build a new container and drop you into a shell. This will be your main interaction point from which you will run other commands. Code is automatically synced between your local environment and the container, so this only needs to be done once per session (or when changing settings in `local.env`).
+
+Within the docker container:
+
 - `make` to see useful commands for this application
-- Install local dependencies: `make install`
+- Install local dependencies: `make install` (this is done automatically when starting the bash shell, but if you make changes you can run this again without rebuilding and it should be fine)
 - Run tests: `make test`
 - Run linters: `make lint`
 - Run dev server: `make run-dev`
   - access localhost:5000 and localhost:5000/ping
 - (optional) run prod-mode server locally: `make run-prod`
   - access localhost:8000 and localhost:8000/ping
+
+## Required ENV
+
+These values should be set in a `.env` file in the project root for development, and in Heroku config when deployed.
+
+### Flask settings
+`FLASK_APP` = cdnauth
+`FLASK_ENV` = production
+
+See [Flask docs](https://flask.palletsprojects.com/en/2.3.x/config/#SECRET_KEY) for information on how to properly generate a secret key. Should be unique for each deployment (stage/prod/local).
+`SECRET_KEY` = generate a long random string. Used for session security. Note: remove all spaces/linebreaks as well as the "BEGIN" and "END" lines from file for ENV setting.
+
+### Identity Provider (IdP) Settings
+
+See [our dev docs](https://mitlibraries.github.io/guides/authentication/touchstone_saml.html#configuring-the-application) for how to obtain the IDP settings
+`IDP_CERT` = standard IST IDP setting
+`IDP_ENTITY_ID` = standard IST IDP setting
+`IDP_SSO_URL` = standard IST IDP setting
+
+### Service Provider (SP) settings
+
+Note: See [our dev docs](https://mitlibraries.github.io/guides/authentication/touchstone_saml.html#generating-a-self-signed-certificate-for-touchstone) for information on how to generate SP key/cert. They should be unique for each deployment and backed up to our shared LastPass.
+
+`SP_ACS_URL` = route in this app that handles the response from IDP. domain name of app + /saml/?acs
+`SP_CERT` = obtained from self signed cert generated for this app. Note: remove all spaces/linebreaks as well as the "BEGIN" and "END" lines from file for ENV setting.
+`SP_ENTITY_ID` = domain name of app + /saml
+`SP_KEY` = obtained from self signed key generated for this app
