@@ -87,3 +87,43 @@ Note: See [our dev docs](https://mitlibraries.github.io/guides/authentication/to
 `SP_CERT` = obtained from self signed cert generated for this app. Note: remove all spaces/linebreaks as well as the "BEGIN" and "END" lines from file for ENV setting.
 `SP_ENTITY_ID` = domain name of app + /saml
 `SP_KEY` = obtained from self signed key generated for this app
+
+### Running a local Identity Provider (IdP)
+
+Touchstone is our production IdP, but cannot be used for development work.
+
+If you are working on a feature and you want to test the full authentication process, using a local IdP can help. It won't be exactly the same as Touchstone so you'll want to test closely in staging, but it often is helpful enough to be worth using.
+
+#### Using Simple SAML IdP in a Container
+
+The docker composer file `idp-compose.yaml` is configured to allow an SP (this app!) to connect.
+
+To start the IdP
+
+```bash
+docker compose -f idp-compose.yaml up
+```
+
+The IdP comes pre-configured with test users:
+
+```text
+name: user1
+password: password
+
+name: user2
+password: password
+```
+
+Your `.env` file will need to be updated to have the following values for IdP related settings:
+
+```yaml
+IDP_CERT=MIICmjCCAYICCQDX5sKPsYV3+jANBgkqhkiG9w0BAQsFADAPMQ0wCwYDVQQDDAR0ZXN0MB4XDTE5MTIyMzA5MDI1MVoXDTIwMDEyMjA5MDI1MVowDzENMAsGA1UEAwwEdGVzdDCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAMdtDJ278DQTp84O5Nq5F8s5YOR34GFOGI2Swb/3pU7X7918lVljiKv7WVM65S59nJSyXV+fa15qoXLfsdRnq3yw0hTSTs2YDX+jl98kK3ksk3rROfYh1LIgByj4/4NeNpExgeB6rQk5Ay7YS+ARmMzEjXa0favHxu5BOdB2y6WvRQyjPS2lirT/PKWBZc04QZepsZ56+W7bd557tdedcYdY/nKI1qmSQClG2qgslzgqFOv1KCOw43a3mcK/TiiD8IXyLMJNC6OFW3xTL/BG6SOZ3dQ9rjQOBga+6GIaQsDjC4Xp7Kx+FkSvgaw0sJV8gt1mlZy+27Sza6d+hHD2pWECAwEAATANBgkqhkiG9w0BAQsFAAOCAQEAm2fk1+gd08FQxK7TL04O8EK1f0bzaGGUxWzlh98a3Dm8+OPhVQRi/KLsFHliLC86lsZQKunYdDB+qd0KUk2oqDG6tstG/htmRYD/S/jNmt8gyPAVi11dHUqW3IvQgJLwxZtoAv6PNs188hvT1WK3VWJ4YgFKYi5XQYnR5sv69Vsr91lYAxyrIlMKahjSW1jTD3ByRfAQghsSLk6fV0OyJHyhuF1TxOVBVf8XOdaqfmvD90JGIPGtfMLPUX4m35qaGAU48PwCL7L3cRHYs9wZWc0ifXZcBENLtHYCLi5txR8c5lyHB9d3AQHzKHMFNjLswn5HsckKg83RH7+eVqHqGw==
+IDP_ENTITY_ID=http://localhost:8080/simplesaml/saml2/idp/metadata.php
+IDP_SSO_URL=http://localhost:8080/simplesaml/saml2/idp/SSOService.php
+```
+
+Note: It's unclear if that IdP cert is fully stable, but so far it has survived a few container rebuilds. If it stops working, remove it from this README and you can get the proper value after the IdP is running from the metadata at:
+
+<http://localhost:8080/simplesaml/saml2/idp/metadata.php?output=xhtml>
+
+Remember while these are the IdP settings to change in `.env`, you will still need to configure the rest of this application appropriately including the SP related config.

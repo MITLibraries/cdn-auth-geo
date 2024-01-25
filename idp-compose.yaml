@@ -1,0 +1,10 @@
+version: "3"
+services:
+  idp:
+    image: kenchan0130/simplesamlphp
+    container_name: idp
+    ports:
+      - "8080:8080"
+    environment:
+      SIMPLESAMLPHP_SP_ENTITY_ID: http://localhost:5000/saml
+      SIMPLESAMLPHP_SP_ASSERTION_CONSUMER_SERVICE: http://localhost:5000/saml/?acs
