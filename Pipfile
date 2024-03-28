@@ -8,6 +8,7 @@ flask = "*"
 gunicorn = "*"
 python3-saml = "*"
 lxml = "==4.9.4"
+pyjwt = "*"
 
 [dev-packages]
 black = "*"

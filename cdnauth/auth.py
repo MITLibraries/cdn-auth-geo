@@ -1,5 +1,4 @@
 import json
-import os
 from functools import wraps
 from urllib.parse import urljoin, urlparse
 
@@ -25,11 +24,9 @@ def is_safe_url(target):
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if (
-            current_app.config["ENV"] != "development"
-            and "samlSessionIndex" not in session
-        ):
+        if "samlNameId" not in session:
             return redirect(url_for("auth.saml", sso=True, next=request.url))
+
         return f(*args, **kwargs)
 
     return decorated_function
@@ -40,13 +37,21 @@ def load_saml_settings():
     with open("saml/settings.json", "r") as json_file:
         json_settings = json.load(json_file)
         json_settings["debug"] = current_app.config["DEBUG"]
-        json_settings["sp"]["entityId"] = os.getenv("SP_ENTITY_ID")
-        json_settings["sp"]["assertionConsumerService"]["url"] = os.getenv("SP_ACS_URL")
-        json_settings["sp"]["x509cert"] = os.getenv("SP_CERT")
-        json_settings["sp"]["privateKey"] = os.getenv("SP_KEY")
-        json_settings["idp"]["entityId"] = os.getenv("IDP_ENTITY_ID")
-        json_settings["idp"]["singleSignOnService"]["url"] = os.getenv("IDP_SSO_URL")
-        json_settings["idp"]["x509cert"] = os.getenv("IDP_CERT")
+        json_settings["sp"]["entityId"] = current_app.config["SP_ENTITY_ID"]
+        json_settings["sp"]["assertionConsumerService"]["url"] = current_app.config[
+            "SP_ACS_URL"
+        ]
+        json_settings["sp"]["x509cert"] = current_app.config["SP_CERT"]
+        json_settings["sp"]["privateKey"] = current_app.config["SP_KEY"]
+        json_settings["idp"]["entityId"] = current_app.config["IDP_ENTITY_ID"]
+        json_settings["idp"]["singleSignOnService"]["url"] = current_app.config[
+            "IDP_SSO_URL"
+        ]
+        json_settings["idp"]["x509cert"] = current_app.config["IDP_CERT"]
+        json_settings["security"]["wantAssertionsEncrypted"] = current_app.config[
+            "SP_SECURITY_ASSERTIONS_ENCRYPTED"
+        ]
+
     return json_settings
 
 
@@ -82,10 +87,14 @@ def saml():
         auth.process_response()
         errors = auth.get_errors()
         if not auth.is_authenticated():
-            # TODO: return something helpful to the user
+            # TODO: return something helpful to the user.
+            # That said, this should never happen.
             pass
         if len(errors) == 0:
-            session["samlNameId"] = auth.get_nameid()
+            session["samlUserdata"] = auth.get_attributes()
+            session["samlNameId"] = session["samlUserdata"][
+                current_app.config["URN_UID"]
+            ][0]
             session["samlSessionIndex"] = auth.get_session_index()
             return redirect(request.form["RelayState"])
         else:

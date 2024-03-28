@@ -65,12 +65,19 @@ Within the docker container:
 
 These values should be set in a `.env` file in the project root for development, and in Heroku config when deployed.
 
-### Flask settings
+### Application settings
+
 `FLASK_APP` = cdnauth
-`FLASK_ENV` = production
+`FLASK_ENV` = production/development/testing as appropriate
 
 See [Flask docs](https://flask.palletsprojects.com/en/2.3.x/config/#SECRET_KEY) for information on how to properly generate a secret key. Should be unique for each deployment (stage/prod/local).
-`SECRET_KEY` = generate a long random string. Used for session security. Note: remove all spaces/linebreaks as well as the "BEGIN" and "END" lines from file for ENV setting.
+`SECRET_KEY` = generate a long random string. Used for session security.
+
+`COOKIE_NAME` = This needs to be the same value in this app and the lambda
+`COOKIE_DOMAIN` = This needs to match the domain the app and cdn are running in. The app and lambda _must_ run in the same domain. NOTE: in development we set this to `False` due to how cookies work with localhost. Setting the domain to `localhost` is rejected by most browsers. Not setting a value works as expected with localhost.
+
+`JWT_SECRET`  = This must be a long random string and be set to the same value for this app and our lambda
+
 
 ### Identity Provider (IdP) Settings
 
@@ -87,6 +94,8 @@ Note: See [our dev docs](https://mitlibraries.github.io/guides/authentication/to
 `SP_CERT` = obtained from self signed cert generated for this app. Note: remove all spaces/linebreaks as well as the "BEGIN" and "END" lines from file for ENV setting.
 `SP_ENTITY_ID` = domain name of app + /saml
 `SP_KEY` = obtained from self signed key generated for this app
+`SP_SECURITY_ASSERTIONS_ENCRYPTED` (optional) = Boolean. Defaults to `True` in production and `False` in development.
+`URN_UID` (optional) = where in the SAML response to get the user info from. Default values are set to work with Touchstone in production and our test IdP in development.
 
 ### Running a local Identity Provider (IdP)
 
@@ -114,6 +123,13 @@ name: user2
 password: password
 ```
 
+If you need to access the IdP admin interface, the credentials are:
+
+```text
+name: admin
+password: secret
+```
+
 Your `.env` file will need to be updated to have the following values for IdP related settings:
 
 ```yaml
@@ -127,3 +143,12 @@ Note: It's unclear if that IdP cert is fully stable, but so far it has survived 
 <http://localhost:8080/simplesaml/saml2/idp/metadata.php?output=xhtml>
 
 Remember while these are the IdP settings to change in `.env`, you will still need to configure the rest of this application appropriately including the SP related config.
+
+If using `make app-bash` followed by `make run-dev`, these values are likely what you want to use.
+
+```yaml
+SP_ACS_URL=http://localhost:5000/saml/?acs
+SP_ENTITY_ID=http://localhost:5000/saml
+```
+
+You should generate a cert/key combo to populate `SP_CERT` and `SP_KEY`. See `Service Provider (SP) settings` above for details.
