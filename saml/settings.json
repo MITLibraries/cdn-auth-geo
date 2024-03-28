@@ -1,0 +1,29 @@
+
+{
+  "strict": true,
+  "debug": "",
+  "sp": {
+    "entityId": "",
+    "assertionConsumerService": {
+      "url": "",
+      "binding": "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"
+    },
+    "x509cert": "",
+    "privateKey": ""
+  },
+  "idp": {
+    "entityId": "",
+    "singleSignOnService": {
+      "url": "",
+      "binding": "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
+    },
+    "x509cert": ""
+  },
+  "security": {
+    "requestedAuthnContext": false,
+    "signMetadata": true,
+    "authnRequestsSigned": true,
+    "wantAssertionsEncrypted": true,
+    "wantAssertionsSigned": true
+  }
+}
