@@ -1,3 +1,4 @@
+import logging
 import json
 from functools import wraps
 from urllib.parse import urljoin, urlparse
@@ -13,6 +14,8 @@ from flask import (
 )
 
 from onelogin.saml2.auth import OneLogin_Saml2_Auth
+
+logging.basicConfig(level=logging.INFO)
 
 
 def is_safe_url(target):
@@ -33,6 +36,10 @@ def login_required(f):
 
 
 def load_saml_settings():
+    """Load SAML settings for use in metadata generation and communication with the IdP
+
+    This method overrides or adds values to what exists in the saml/settings.json file
+    """
     json_settings = {}
     with open("saml/settings.json", "r") as json_file:
         json_settings = json.load(json_file)
@@ -56,6 +63,7 @@ def load_saml_settings():
 
 
 def prepare_flask_request(request):
+    """Return a dictionary in a format that OneLogin_Saml2_Auth uses during init"""
     url_data = urlparse(request.url)
     return {
         "https": "on" if request.scheme == "https" else "off",
@@ -72,11 +80,23 @@ bp = Blueprint("auth", __name__, url_prefix="/saml")
 
 @bp.route("/", methods=("GET", "POST"))
 def saml():
+    """This route handles two important situations.
+
+    The first, "sso" path, redirects a user to the IdP and sets a value of where to redirect
+    the user to after they come back to this application. "next_page" is the resource in our
+    CDN they originally requested but were redirected to this auth app because they were not
+    authenticated. Keeping track of what they wanted is essential to the functionality of
+    this solution.
+
+     The second, "acs" path is handles the response back from the IDP. We should never encounter
+     the path with "acs" in which a user is not authenticated, as they would not be redirected
+     back from the IDP to us and not be authenticated.
+    """
     saml_settings = load_saml_settings()
     req = prepare_flask_request(request)
     auth = OneLogin_Saml2_Auth(req, saml_settings)
-    errors = []
     next_page = request.args.get("next")
+
     if not next_page or is_safe_url(next_page) is False:
         next_page = ""
 
@@ -87,8 +107,9 @@ def saml():
         auth.process_response()
         errors = auth.get_errors()
         if not auth.is_authenticated():
-            # TODO: return something helpful to the user.
-            # That said, this should never happen.
+            # TODO: return a useful error to the user
+            logging.error("User returned from IdP with no authentication")
+            logging.error(f"Errors: {errors}")
             pass
         if len(errors) == 0:
             session["samlUserdata"] = auth.get_attributes()
@@ -98,8 +119,10 @@ def saml():
             session["samlSessionIndex"] = auth.get_session_index()
             return redirect(request.form["RelayState"])
         else:
-            print("Errors: %s", errors)
-            print("Last error reason: %s", auth.get_last_error_reason())
+            # TODO: return a useful error to the user
+            logging.error(f"Errors occured processing IdP response: {errors}")
+            logging.error(f"Last error reason: {auth.get_last_error_reason()}")
+            pass
 
 
 @bp.route("/metadata/")

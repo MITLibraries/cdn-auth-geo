@@ -67,35 +67,36 @@ These values should be set in a `.env` file in the project root for development,
 
 ### Application settings
 
-`FLASK_APP` = cdnauth
-`FLASK_ENV` = production/development/testing as appropriate
-
-See [Flask docs](https://flask.palletsprojects.com/en/2.3.x/config/#SECRET_KEY) for information on how to properly generate a secret key. Should be unique for each deployment (stage/prod/local).
-`SECRET_KEY` = generate a long random string. Used for session security.
-
-`COOKIE_NAME` = This needs to be the same value in this app and the lambda
-`COOKIE_DOMAIN` = This needs to match the domain the app and cdn are running in. The app and lambda _must_ run in the same domain. NOTE: in development we set this to `False` due to how cookies work with localhost. Setting the domain to `localhost` is rejected by most browsers. Not setting a value works as expected with localhost.
-
-`JWT_SECRET`  = This must be a long random string and be set to the same value for this app and our lambda
-
+- `FLASK_APP` = cdnauth
+- `FLASK_ENV` = production/development/testing as appropriate
+- `SECRET_KEY` = generate a long random string. Used for session security.
+  - See [Flask docs](https://flask.palletsprojects.com/en/2.3.x/config/#SECRET_KEY) for information on how to properly generate a secret key. Should be unique for each deployment (stage/prod/local).
+- `COOKIE_NAME` = This needs to be the same value in this app and the lambda
+- `COOKIE_DOMAIN` = This needs to match the domain the app and cdn are running in. The app and lambda _must_ run in the same domain.
+  - NOTE: in development we set this to `False` due to how cookies work with localhost. Setting the domain to `localhost` is rejected by most browsers. Not setting a value works as expected with localhost.
+- `JWT_SECRET`  = This must be a long random string and be set to the same value for this app and our lambda
+- `VALID_DOMAINS` = A list of domains that we allow redirecting users to. Default values are likely appropriate for most use cases, but overriding during development may be convenient.
 
 ### Identity Provider (IdP) Settings
 
 See [our dev docs](https://mitlibraries.github.io/guides/authentication/touchstone_saml.html#configuring-the-application) for how to obtain the IDP settings
-`IDP_CERT` = standard IST IDP setting
-`IDP_ENTITY_ID` = standard IST IDP setting
-`IDP_SSO_URL` = standard IST IDP setting
+
+- `IDP_CERT` = standard IST IDP setting
+- `IDP_ENTITY_ID` = standard IST IDP setting
+- `IDP_SSO_URL` = standard IST IDP setting
 
 ### Service Provider (SP) settings
 
 Note: See [our dev docs](https://mitlibraries.github.io/guides/authentication/touchstone_saml.html#generating-a-self-signed-certificate-for-touchstone) for information on how to generate SP key/cert. They should be unique for each deployment and backed up to our shared LastPass.
 
-`SP_ACS_URL` = route in this app that handles the response from IDP. domain name of app + /saml/?acs
-`SP_CERT` = obtained from self signed cert generated for this app. Note: remove all spaces/linebreaks as well as the "BEGIN" and "END" lines from file for ENV setting.
-`SP_ENTITY_ID` = domain name of app + /saml
-`SP_KEY` = obtained from self signed key generated for this app
-`SP_SECURITY_ASSERTIONS_ENCRYPTED` (optional) = Boolean. Defaults to `True` in production and `False` in development.
-`URN_UID` (optional) = where in the SAML response to get the user info from. Default values are set to work with Touchstone in production and our test IdP in development.
+- `SP_ACS_URL` = route in this app that handles the response from IDP. domain name of app + /saml/?acs
+- `SP_CERT` = obtained from self signed cert generated for this app.
+  - Note: remove all spaces/linebreaks as well as the "BEGIN" and "END" lines from file for ENV setting.
+- `SP_ENTITY_ID` = domain name of app + /saml
+- `SP_KEY` = obtained from self signed key generated for this app
+  - Note: remove all spaces/linebreaks as well as the "BEGIN" and "END" lines from file for ENV setting.
+- `SP_SECURITY_ASSERTIONS_ENCRYPTED` (optional) = Boolean. Defaults to `True` in production and `False` in development.
+- `URN_UID` (optional) = where in the SAML response to get the user info from. Default values are set to work with Touchstone in production and our test IdP in development.
 
 ### Running a local Identity Provider (IdP)
 

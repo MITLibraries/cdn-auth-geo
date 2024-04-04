@@ -20,6 +20,10 @@ class Config:
     SP_KEY = os.getenv("SP_KEY")
     TESTING = False
     URN_UID = os.getenv("URN_UID", default="urn:oid:1.3.6.1.4.1.5923.1.1.1.6")
+    VALID_DOMAINS = os.getenv(
+        "VALID_DOMAINS",
+        default="cdn.libraries.mit.edu,cdn.dev1.mitlibrary.net,cdn.stage.mitlibrary.net",
+    )
 
 
 class DevelopmentConfig(Config):
