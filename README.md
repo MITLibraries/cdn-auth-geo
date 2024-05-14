@@ -40,9 +40,8 @@ Not all links are publicly accessible.
 
 ## How to run this app locally
 
-This application expects to be developed in docker. [There are dependency issues with libxmlxec1 on macos](https://github.com/SAML-Toolkits/python3-saml/issues/356) at this time and rather than each of us fighting with that, we will develop inside the docker container so it can be solved programatically and repeatably.
-
-Additionally, `lxml` versions newer than 4.9.4 [crash python3-saml](https://github.com/SAML-Toolkits/python3-saml/issues/389)
+This application can be developed in docker, or see the section `Non-docker on macos` for tips on how to successfully
+build dependencies outside the container environment if you prefer.
 
 ### General development workflow
 
@@ -60,6 +59,13 @@ Within the docker container:
   - access localhost:5000 and localhost:5000/ping
 - (optional) run prod-mode server locally: `make run-prod`
   - access localhost:8000 and localhost:8000/ping
+
+### Non-docker on macos
+
+- install libxml2 via brew (possibly also libxmlsec1 and pkg-config?)
+- make libxml2 available. `brew` will not link as this package (but an older version) is provide by macos.
+  `set -gx PKG_CONFIG_PATH "/usr/local/opt/libxml2/lib/pkgconfig"`
+- `make install`
 
 ## Required ENV
 

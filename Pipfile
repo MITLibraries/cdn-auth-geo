@@ -7,7 +7,7 @@ name = "pypi"
 flask = "*"
 gunicorn = "*"
 python3-saml = "*"
-lxml = "==4.9.4"
+lxml = "*"
 pyjwt = "*"
 
 [dev-packages]
