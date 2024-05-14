@@ -61,6 +61,12 @@ Within the docker container:
 - (optional) run prod-mode server locally: `make run-prod`
   - access localhost:8000 and localhost:8000/ping
 
+Non-docker on macos:
+- install libxml2 via brew (possibly also libxmlsec1 and pkg-config?)
+- make libxml2 available. `brew` will not link as this package (but an older version) is provide by macos.
+  `set -gx PKG_CONFIG_PATH "/usr/local/opt/libxml2/lib/pkgconfig"`
+- `make install`
+
 ## Required ENV
 
 These values should be set in a `.env` file in the project root for development, and in Heroku config when deployed.
