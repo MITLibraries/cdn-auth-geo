@@ -66,7 +66,9 @@ def test_valid_download_url_with_session_timdexui_flag(client):
     with client.session_transaction() as session:
         session["samlNameId"] = "yo@example.com"
 
-    res = client.get("/?cdn_resource=http://cdn.libraries.mit.edu/restricted/stuff.zip?timdexui=true")
+    res = client.get(
+        "/?cdn_resource=http://cdn.libraries.mit.edu/restricted/stuff.zip?timdexui=true"
+    )
     assert res.status_code == 200
     assert b"MIT authentication successful: " in res.data
     assert b"your download should start shortly." in res.data

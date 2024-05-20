@@ -37,8 +37,10 @@ def session_jwt():
             timdexui = False
 
         response = make_response(
-            render_template("download.html", cdn_resource=cdn_resource,
-                            timdexui=timdexui))
+            render_template(
+                "download.html", cdn_resource=cdn_resource, timdexui=timdexui
+            )
+        )
         token = jwt.encode(
             {
                 "user": session["samlNameId"],
