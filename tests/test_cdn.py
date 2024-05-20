@@ -57,8 +57,20 @@ def test_valid_download_url_with_session(client):
 
     res = client.get("/?cdn_resource=http://cdn.libraries.mit.edu/restricted/stuff.zip")
     assert res.status_code == 200
-    assert b"Authenticated successfully" in res.data
-    assert b"Your download should start shortly" in res.data
+    assert b"MIT authentication successful: " in res.data
+    assert b"your download should start shortly." in res.data
+    assert b"Close this window/tab to return to your search." not in res.data
+
+
+def test_valid_download_url_with_session_timdexui_flag(client):
+    with client.session_transaction() as session:
+        session["samlNameId"] = "yo@example.com"
+
+    res = client.get("/?cdn_resource=http://cdn.libraries.mit.edu/restricted/stuff.zip?timdexui=true")
+    assert res.status_code == 200
+    assert b"MIT authentication successful: " in res.data
+    assert b"your download should start shortly." in res.data
+    assert b"Close this window/tab to return to your search." in res.data
 
 
 def test_valid_request_sets_cookie(client):

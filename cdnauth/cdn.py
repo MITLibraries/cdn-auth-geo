@@ -28,9 +28,17 @@ def session_jwt():
         if valid_redirect(request.args["cdn_resource"]) is False:
             logging.info(f"Invalid redirect URL: {request.args['cdn_resource']}")
             return "Invalid redirect URL"
+
+        cdn_resource = request.args["cdn_resource"]
+
+        if "timdexui=true" in cdn_resource:
+            timdexui = True
+        else:
+            timdexui = False
+
         response = make_response(
-            render_template("download.html", cdn_resource=request.args["cdn_resource"])
-        )
+            render_template("download.html", cdn_resource=cdn_resource,
+                            timdexui=timdexui))
         token = jwt.encode(
             {
                 "user": session["samlNameId"],
