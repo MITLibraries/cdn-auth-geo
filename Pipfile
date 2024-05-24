@@ -9,6 +9,7 @@ gunicorn = "*"
 python3-saml = "*"
 lxml = "*"
 pyjwt = "*"
+werkzeug = "3.0.2"
 
 [dev-packages]
 black = "*"

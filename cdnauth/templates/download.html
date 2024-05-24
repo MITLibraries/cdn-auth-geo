@@ -3,13 +3,16 @@
   <head>
     <!--Inform web browser to redirect user to another location
     See https://developer.mozilla.org/en-US/docs/Web/HTML/Element/meta for more information -->
-    <meta http-equiv="refresh" content="5; url={{ cdn_resource }}" />
+    <meta http-equiv="refresh" content="3; url={{ cdn_resource }}" />
   </head>
   <body>
-    <p>Authenticated successfully</p>
-    <p>
-      Your download should start shortly. If it does not, this is a link to your
-      <a href="{{ cdn_resource }}">requested file</a>.
-    </p>
+    <p>MIT authentication successful: your download should start shortly.</p>
+    <p>If it does not, <a href="{{ cdn_resource }}">use this link to access the file</a>.</p>
+
+    <!-- only display the close button if the user came from TIMDEX-UI where we know this is correct -->
+
+    {% if timdexui == True %}
+    <p>Close this window/tab to return to your search.</p>
+    {% endif %}
   </body>
 </html>
